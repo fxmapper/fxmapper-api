@@ -15,9 +15,6 @@ $router->get('/', function () use ($router) {
     return $router->app->version();
 });
 
-
-
-
 // Return the value of how many To's one From is worth
 // Example: Show the USD/BTC to exchange rate
 // Valid API is required to get options, otherwise it'll only return the price, not the rest of the data.
