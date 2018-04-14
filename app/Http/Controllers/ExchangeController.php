@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
-//use Illuminate\Support\Facades\DB;
 use App\ExchangeRateModel;
 use App\ApiKeyModel;
 use App\RequestLog;
@@ -14,16 +13,17 @@ class ExchangeController extends Controller
 
     public function __construct()
     {
-        $this->rateLookup = new ExchangeRateModel;
 
     }
 
     public function index(Request $request, $source, $target, $key, $options = null){
+        $exchanger = new ExchangeRateModel;
+
         if(null === $key){
             $key = '0';
         }
 
-        $data = $this->rateLookup->rate($source, $target);
+        $data = $exchanger->rate($source, $target);
         $options = explode(',',$options);
 
         $valid = ApiKeyModel::checkIfValid($key);
