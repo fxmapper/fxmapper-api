@@ -18,8 +18,6 @@ class ExchangeRateModel extends Model
         // Check input for obvious errors such as string length, invalid characters
         $error = false;
         $result = [];
-        $source = normalize($source);
-        $destination = normalize($destination);
 
         if(is_object($source)) {
             $error = true;
@@ -45,8 +43,8 @@ class ExchangeRateModel extends Model
 
                 $price = $result1->price / $result2->price;
 
-                $result['source'] = $source;
-                $result['destination'] = $destination;
+                $result['source'] = strtoupper($source);
+                $result['destination'] = strtoupper($destination);
                 $result['price'] = sprintf("%.15f", 1/$price);
                 $result['asOf'] = $result1->date_created;
             }

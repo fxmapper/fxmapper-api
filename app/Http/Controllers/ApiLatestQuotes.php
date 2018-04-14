@@ -9,48 +9,51 @@ use Illuminate\Support\Facades\Response;
 use App\ApiKeyModel;
 use Carbon\Carbon;
 use App\RequestLog;
+use Illuminate\Support\Facades\DB;
 
 class ApiLatestQuotes extends Controller
 {
     //
+    private $key;
 
-    public function index(Request $request, $key)
+    public function __construct(Request $request)
     {
+        $this->key = $request->segment(3);
+    }
+
+
+
+    public function index(Request $request){
         $log = new RequestLog;
-
         $rates = new ExchangeRateModel;
-        $user = ApiKeyModel::where([
-            'key' => $key,
-            'active' => 1,
-        ])->first();
 
-        $count = count($user);
+        $apiKey = ApiKeyModel::where(['active' => 1, 'key' => $this->key])->first();
 
-        if($count == 0){
-            return Response::json("Unauthorized API Key",  $status=200, $headers=[], $options=JSON_PRETTY_PRINT);
-        }
+        if(!$apiKey){
+            return [
+                'status' => 'error - invalid API key'
+            ];
+        };
 
-        $currencies = CurrencyModel::where(['active' => 1])
-            ->orderBy('name', 'asc')
-            ->get();
+        $currencies = CurrencyModel::getActive();
 
-        $data['base'] = $user->base;
+        $data['status'] = 'OK';
+        $data['base'] = $apiKey->base;
         $data['date'] = Carbon::now()->toDateTimeString();
 
         foreach($currencies as $c){
-            $data['rates'][$c->code] = $rates->rate($user->base, $c->code)['price'];
+            $data['rates'][$c->code] = $rates->rate($apiKey->base, $c->code)['price'];
         }
 
         // Log result
         // initialize logger
         $log->source = strtoupper($data['base']);
         $log->target = strtoupper('latest');
-        $log->key = $user->key;
-        $log->user_agent = $request->userAgent();
+        $log->key = $apiKey->key;
         $log->user_ip = $request->ip();
         $log->save();
 
-        return Response::json($data,  $status=200, $headers=[], $options=JSON_PRETTY_PRINT);
-    }
+        return response(json_encode($data, JSON_PRETTY_PRINT), 200, ['Content-Type' => 'application/json']);
 
+    }
 }

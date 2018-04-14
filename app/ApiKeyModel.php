@@ -46,4 +46,10 @@ class ApiKeyModel extends Model
         return $this->hasMany('App\RequestLog', 'key', 'key');
     }
 
+    public static function checkIfValid($key){
+        if(count(static::where(['active' => true, 'key' => $key])->first()) === 0){
+            return false;
+        }
+        return true;
+    }
 }

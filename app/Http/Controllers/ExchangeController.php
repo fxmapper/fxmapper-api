@@ -18,42 +18,35 @@ class ExchangeController extends Controller
 
     }
 
-    public function index(Request $request, $source, $target, $key = null, $options = null){
-        $data = $this->rateLookup->rate($source, $target);
-        $options = explode(',',$options);
-        $log = new RequestLog;
-
+    public function index(Request $request, $source, $target, $key, $options = null){
         if(null === $key){
             $key = '0';
         }
+
+        $data = $this->rateLookup->rate($source, $target);
+        $options = explode(',',$options);
+
+        $valid = ApiKeyModel::checkIfValid($key);
+        $log = new RequestLog;
 
         // initialize logger
         $log->source = strtoupper($source);
         $log->target = strtoupper($target);
         $log->key = $key;
-        $log->user_agent = $request->userAgent();
         $log->user_ip = $request->ip();
-
-        if(!$this->isApiValid($key)){
-            $log->save();
-            sleep(3);
-            return (array)['price' => $data['price']];
-        }
         $log->save();
+
+        if(!$valid) {
+            sleep(5);
+            return response(json_encode(['price' => $data['price']] , JSON_PRETTY_PRINT), 200, ['Content-Type' => 'application/json']);
+        }
 
         if(in_array('csv', $options)){
             return implode(',', (array)$data);
         }
 
-        return Response::json($data,  $status=200, $headers=[], $options=JSON_PRETTY_PRINT);
+        return response(json_encode($data, JSON_PRETTY_PRINT), 200, ['Content-Type' => 'application/json']);
 
     }
 
-    private function isApiValid($api){
-        return (bool)count(ApiKeyModel::where([
-            'key' => $api,
-            'active' => 1
-        ])->get()
-        );
-    }
 }
