@@ -67,6 +67,10 @@ $app->singleton(
 //     'auth' => App\Http\Middleware\Authenticate::class,
 // ]);
 
+$app->routeMiddleware([
+    'https' => App\Http\Middleware\OnlyAllowHttpsRequests::class,
+]);
+
 /*
 |--------------------------------------------------------------------------
 | Register Service Providers

@@ -15,9 +15,11 @@ $router->get('/', function () use ($router) {
     return $router->app->version();
 });
 
-// Return the value of how many To's one From is worth
-// Example: Show the USD/BTC to exchange rate
-// Valid API is required to get options, otherwise it'll only return the price, not the rest of the data.
-$router->get('/v1/exchange/{source}/{target}[/{key}[/{options}]]', 'ExchangeController@index');
-
-$router->get('/v1/latest[/{key}]', 'ApiLatestQuotes@index');
+// Only allow access to these routes with HTTPS
+Route::group([
+    'middleware' => 'https',
+    'prefix' => '/v1',
+    ], function() {
+    Route::get('/exchange/{source}/{target}[/{key}[/{options}]]', 'ExchangeController@index');
+    Route::get('/latest[/{key}]', 'ApiLatestQuotes@index');
+});
