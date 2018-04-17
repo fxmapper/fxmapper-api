@@ -10,7 +10,7 @@ use App\ApiKeyModel;
 use Carbon\Carbon;
 use App\RequestLog;
 
-class ApiLatestQuotes extends Controller
+class LatestQuotes extends Controller
 {
     //
     private $key;
@@ -19,8 +19,6 @@ class ApiLatestQuotes extends Controller
     {
         $this->key = $request->segment(3);
     }
-
-
 
     public function index(Request $request){
         $log = new RequestLog;

@@ -8,11 +8,22 @@ use App\ExchangeRateModel;
 use App\ApiKeyModel;
 use App\RequestLog;
 
-class ExchangeController extends Controller
+class Exchanger extends Controller
 {
 
     public function index(Request $request, $source, $target, $key, $options = null){
         $exchanger = new ExchangeRateModel;
+
+//        This should be here for validation, but the route doesn't bring people here unless they provided source and target
+//          Solution 1: Make them optional parameters
+//          Solution 2: Have new routes for /v1/exchange/ and /v1/exchange/{source}
+//        if(!$source){
+//            return response(json_encode(['You must provide source and target currency codes'], JSON_PRETTY_PRINT), 200, ['Content-Type' => 'application/json']);
+//        }
+//
+//        if(!$target){
+//            return response(json_encode(['You must provide a target currency code'], JSON_PRETTY_PRINT), 200, ['Content-Type' => 'application/json']);
+//        }
 
         if(null === $key){
             $key = '0';

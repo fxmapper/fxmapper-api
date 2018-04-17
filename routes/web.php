@@ -21,7 +21,7 @@ Route::group(
         'middleware' => 'https',
         'prefix' => '/v1',
     ], function() {
-        Route::get('/exchange/{source}/{target}[/{key}[/{options}]]', 'Version1\ExchangeController@index');
-        Route::get('/latest[/{key}]', 'Version1\ApiLatestQuotes@index');
+        Route::get('/exchange/{source}/{target}[/{key}[/{options}]]', 'Version1\Exchanger@index');
+        Route::get('/latest[/{key}]', 'Version1\LatestQuotes@index');
     }
 );
