@@ -17,7 +17,7 @@ class OnlyAllowHttpsRequests
      */
     public function handle($request, Closure $next)
     {
-        if(Request::secure() == false && App::environment() !== 'local'){
+        if(Request::secure() == false && App::environment() == 'production'){
             return response(['This endpoint can only be accessed with an HTTPS connection'], 403);
         }
 
