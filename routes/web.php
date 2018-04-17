@@ -16,10 +16,12 @@ $router->get('/', function () use ($router) {
 });
 
 // Only allow access to these routes with HTTPS
-Route::group([
-    'middleware' => 'https',
-    'prefix' => '/v1',
+Route::group(
+    [
+        'middleware' => 'https',
+        'prefix' => '/v1',
     ], function() {
-    Route::get('/exchange/{source}/{target}[/{key}[/{options}]]', 'ExchangeController@index');
-    Route::get('/latest[/{key}]', 'ApiLatestQuotes@index');
-});
+        Route::get('/exchange/{source}/{target}[/{key}[/{options}]]', 'Version1\ExchangeController@index');
+        Route::get('/latest[/{key}]', 'Version1\ApiLatestQuotes@index');
+    }
+);

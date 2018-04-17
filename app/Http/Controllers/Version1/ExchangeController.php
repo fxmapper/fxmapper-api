@@ -1,20 +1,15 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Version1;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Response;
 use App\ExchangeRateModel;
 use App\ApiKeyModel;
 use App\RequestLog;
 
 class ExchangeController extends Controller
 {
-
-    public function __construct()
-    {
-
-    }
 
     public function index(Request $request, $source, $target, $key, $options = null){
         $exchanger = new ExchangeRateModel;
@@ -42,7 +37,7 @@ class ExchangeController extends Controller
         }
 
         if(in_array('csv', $options)){
-            return implode(',', (array)$data);
+            return response(implode(', ', (array)$data), 200, ['Content-Type' => 'text/text']);
         }
 
         return response(json_encode($data, JSON_PRETTY_PRINT), 200, ['Content-Type' => 'application/json']);

@@ -1,15 +1,14 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Version1;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\CurrencyModel;
 use App\ExchangeRateModel;
-use Illuminate\Support\Facades\Response;
 use App\ApiKeyModel;
 use Carbon\Carbon;
 use App\RequestLog;
-use Illuminate\Support\Facades\DB;
 
 class ApiLatestQuotes extends Controller
 {
