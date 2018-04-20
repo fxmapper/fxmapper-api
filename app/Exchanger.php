@@ -5,7 +5,7 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
-class ExchangeRateModel extends Model
+class Exchanger extends Model
 {
     //
 

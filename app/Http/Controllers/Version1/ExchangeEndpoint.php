@@ -4,15 +4,15 @@ namespace App\Http\Controllers\Version1;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\ExchangeRateModel;
+use App\Exchanger;
 use App\ApiKeyModel;
 use App\RequestLog;
 
-class Exchanger extends Controller
+class ExchangeEndpoint extends Controller
 {
 
     public function index(Request $request, $source, $target, $key, $options = null){
-        $exchanger = new ExchangeRateModel;
+        $exchanger = new Exchanger;
 
 //        This should be here for validation, but the route doesn't bring people here unless they provided source and target
 //          Solution 1: Make them optional parameters

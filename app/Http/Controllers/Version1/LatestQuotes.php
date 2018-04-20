@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Version1;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\CurrencyModel;
-use App\ExchangeRateModel;
+use App\Exchanger;
 use App\ApiKeyModel;
 use Carbon\Carbon;
 use App\RequestLog;
@@ -20,10 +20,7 @@ class LatestQuotes extends Controller
         $this->key = $request->segment(3);
     }
 
-    public function index(Request $request){
-        $log = new RequestLog;
-        $rates = new ExchangeRateModel;
-
+    public function index(Request $request, Exchanger $exchanger, RequestLog $log){
         $apiKey = ApiKeyModel::where(['active' => 1, 'key' => $this->key])->first();
 
         if(!$apiKey){
@@ -39,7 +36,7 @@ class LatestQuotes extends Controller
         $data['date'] = Carbon::now()->toDateTimeString();
 
         foreach($currencies as $c){
-            $data['rates'][$c->code] = $rates->rate($apiKey->base, $c->code)['price'];
+            $data['rates'][$c->code] = $exchanger->rate($apiKey->base, $c->code)['price'];
         }
 
         // Log result
