@@ -2,52 +2,41 @@
 
 namespace App\Http\Controllers\Version1;
 
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\CurrencyModel;
 use App\Exchanger;
 use App\ApiKeyModel;
 use Carbon\Carbon;
-use App\RequestLog;
 
-class LatestQuotes extends Controller
+class LatestQuotes extends ControllerV1
 {
-    //
-    private $key;
+    public function index(Request $request, Exchanger $exchanger, $key){
+        $api = ApiKeyModel::where(['active' => 1, 'key' => $key])->first();
 
-    public function __construct(Request $request)
-    {
-        $this->key = $request->segment(3);
-    }
-
-    public function index(Request $request, Exchanger $exchanger, RequestLog $log){
-        $apiKey = ApiKeyModel::where(['active' => 1, 'key' => $this->key])->first();
-
-        if(!$apiKey){
-            return [
-                'status' => 'error - invalid API key'
-            ];
-        };
+        if(!ApiKeyModel::checkIfValid($key)){
+            return $this->badApiKey();
+        }
 
         $currencies = CurrencyModel::getActive();
 
         $data['status'] = 'OK';
-        $data['base'] = $apiKey->base;
+        $data['base'] = $api->base;
         $data['date'] = Carbon::now()->toDateTimeString();
 
         foreach($currencies as $c){
-            $data['rates'][$c->code] = $exchanger->rate($apiKey->base, $c->code)['price'];
+            $data['rates'][$c->code] = $exchanger->quick($api->base, $c->code)->price;
         }
 
         // Log result
         // initialize logger
-        $log->source = strtoupper($data['base']);
-        $log->target = strtoupper('latest');
-        $log->key = $apiKey->key;
-        $log->user_ip = $request->ip();
-        $log->save();
+        $this->logger->source = strtoupper($data['base']);
+        $this->logger->target = strtoupper('latest');
+        $this->logger->key = trim($key);
+        $this->logger->user_ip = $request->ip();
+        $this->logger->save();
 
         return response(json_encode($data, JSON_PRETTY_PRINT), 200, ['Content-Type' => 'application/json']);
 
     }
+
 }

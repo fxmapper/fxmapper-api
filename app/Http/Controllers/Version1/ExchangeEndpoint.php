@@ -2,57 +2,51 @@
 
 namespace App\Http\Controllers\Version1;
 
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Exchanger;
 use App\ApiKeyModel;
-use App\RequestLog;
+use App\CurrencyModel;
 
-class ExchangeEndpoint extends Controller
+class ExchangeEndpoint extends ControllerV1
 {
-
-    public function index(Request $request, $source, $target, $key, $options = null){
-        $exchanger = new Exchanger;
-
-//        This should be here for validation, but the route doesn't bring people here unless they provided source and target
-//          Solution 1: Make them optional parameters
-//          Solution 2: Have new routes for /v1/exchange/ and /v1/exchange/{source}
-//        if(!$source){
-//            return response(json_encode(['You must provide source and target currency codes'], JSON_PRETTY_PRINT), 200, ['Content-Type' => 'application/json']);
-//        }
-//
-//        if(!$target){
-//            return response(json_encode(['You must provide a target currency code'], JSON_PRETTY_PRINT), 200, ['Content-Type' => 'application/json']);
-//        }
-
-        if(null === $key){
-            $key = '0';
-        }
-
-        $data = $exchanger->rate($source, $target);
+    public function index(Request $request, Exchanger $exchanger, $source, $target, $key, $options = null){
+        $data = $exchanger->quick($source, $target);
         $options = explode(',',$options);
 
-        $valid = ApiKeyModel::checkIfValid($key);
-        $log = new RequestLog;
+        $source = CurrencyModel::where(['code' => $source])->first();
+        $target = CurrencyModel::where(['code' => $target])->first();
+
+        if(null == $source || null ==  $target) {
+            return $this->symbolsInvalid();
+        }
 
         // initialize logger
-        $log->source = strtoupper($source);
-        $log->target = strtoupper($target);
-        $log->key = $key;
-        $log->user_ip = $request->ip();
-        $log->save();
+        $this->logger->source = strtoupper($source->code);
+        $this->logger->target = strtoupper($target->code);
+        $this->logger->user_ip = $request->ip();
+        $this->logger->key = $key;
 
-        if(!$valid) {
+        if(!ApiKeyModel::checkIfValid($key)){
             sleep(5);
-            return response(json_encode(['price' => $data['price']] , JSON_PRETTY_PRINT), 200, ['Content-Type' => 'application/json']);
+            $this->logger->key = 0;
         }
+
+        $this->logger->save();
 
         if(in_array('csv', $options)){
             return response(implode(', ', (array)$data), 200, ['Content-Type' => 'text/text']);
         }
 
         return response(json_encode($data, JSON_PRETTY_PRINT), 200, ['Content-Type' => 'application/json']);
-
     }
 
+    public function symbolsInvalid(){
+        $data = [
+            'status' => 'Fail',
+            'reason' => 'One or both of the currency symbols provided are not valid.',
+        ];
+
+        return response(json_encode($data, JSON_PRETTY_PRINT), 403, ['Content-Type' => 'application/json']);
+
+    }
 }
