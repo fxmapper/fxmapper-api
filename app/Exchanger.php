@@ -24,7 +24,7 @@ class Exchanger extends Model
         $result['source'] = strtoupper($source);
         $result['destination'] = strtoupper($target);
         $result['price'] = sprintf("%.15f", 1/$price);
-        $result['asOf'] = $result1->date_created;
+        $result['date'] = $result1->date_created;
 
         return (object)$result;
 
